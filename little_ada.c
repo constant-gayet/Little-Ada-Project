@@ -14,186 +14,186 @@ typedef struct constante
 
 typedef enum
 {
-    ABS = 'abs',
-    NOT = 'not',
-    HYP = '-'
+    ABS,
+    NOT,
+    HYP
 } absnot;
 
 typedef enum
 {
-    PLU = '+',
-    MIN = '-',
-    MUL = '*',
-    DIV = '/',
-    POW = '**',
-    EQU = '=',
-    NEQ = '/=',
-    INF = '<=',
-    SUP = '>=',
-    SINF = '<',
-    SSUP = '>',
-    MOD = 'mod',
-    REM = 'rem',
-    AND = 'and',
-    OR = 'or',
-    XOR = 'xor'
+    PLU,
+    MIN,
+    MUL,
+    DIV,
+    POW,
+    EQU,
+    NEQ,
+    INF,
+    SUP,
+    SINF,
+    SSUP,
+    MOD,
+    REM,
+    AND,
+    OR,
+    XOR
 } symbole;
 
 typedef union expression
 {
     identifiant id;
     constante c;
-    struct absnot
+    struct
     {
         absnot s;
-        expression e;
-    };
-    struct doubleexp
+        union expression *e;
+    } absnot;
+    struct
     {
-        expression e1;
+        union expression *e1;
         symbole s;
-        expression e2;
-    };
-
-    struct etcoupecircuit
-    {
-        expression e1;
-
-        expression e2;
-    };
-
-    struct oucoupecircuit
-    {
-        expression e1;
-
-        expression e2;
-    };
+        union expression *e2;
+    } doubleexp;
 
     struct
     {
-        identifiant id;
-        expression *e;
+        union expression *e1;
+
+        union expression *e2;
+    } etcoupecircuit;
+
+    struct
+    {
+        union expression *e1;
+
+        union expression *e2;
+    } oucoupecircuit;
+
+    struct
+    {
+        identifiant id1;
+        union expression *e;
     };
 } expression;
 
 typedef struct instruction
 {
     identifiant id;
-    union u
+    union
     {
         char *null;
-        struct affectation
+        struct
         {
             identifiant id;
             expression e;
-        };
-        union appelprocedure
+        } affectation;
+        union
         {
             identifiant id;
-            struct args
+            struct
             {
                 identifiant id;
                 expression *e;
-            };
-        };
+            } args;
+        } appelprocedure;
 
-        struct boucle_simple
+        struct
         {
             identifiant id;
             char *loop;
-            instruction *i;
+            struct instruction *ins_list;
             char *endloop;
-        };
+        } boucle_simple;
 
-        struct boucle_while
+        struct
         {
             char *word_while;
             expression e;
-            struct boucle_simple b;
-        };
+            struct boucle_simple *b;
+        } boucle_while;
 
-        struct boucle_pour_tout
+        struct
         {
             char *word_for;
             identifiant id1;
             char *in;
             char *reverse;
-            union option
+            union
             {
-                type t;
+                union type *t;
                 struct
                 {
                     expression e1;
                     expression e2;
                 };
-            };
-            struct boucle_simple b;
-        };
+            } option;
+            struct boucle_simple *b;
+        } boucle_pour_tout;
 
-        struct cond_if
+        struct
         {
             expression e;
-            instruction *i;
-            union elseif
+            struct instruction *ins_list;
+            union
             {
                 char *null;
-                struct cond_elseif
+                struct
                 {
                     expression e;
-                    instruction *i;
-                };
-            } * liste_elseif;
-            union cond_else
+                    struct instruction *ins_list;
+                } cond_elseif;
+            } * elseif;
+            union
             {
                 char *null;
-                instruction *i_else;
-            };
-        };
+                struct instruction *i_else;
+            } cond_else;
+        } cond_if;
 
-        struct cas
+        struct
         {
             expression e;
-            struct alternative
+            struct
             {
-                union choix
+                union
                 {
                     expression e;
-                    struct couple_expression
+                    struct
                     {
                         expression e1;
                         expression e2;
-                    };
+                    } couple_expression;
                     char *others;
-                };
-                instruction *i;
-            } * suite;
-        };
+                } choix;
+                struct instruction *ins_list;
+            } * alternative;
+        } cas;
 
-        struct saut
+        struct
         {
             identifiant id;
             char *word_goto;
-        };
+        } saut;
 
-        struct sortie
+        struct
         {
             char *exit;
             identifiant id;
             char *when;
             expression e;
-        };
+        } sortie;
 
-        struct retour_procedure
+        struct
         {
             char *retour;
-        };
+        } retour_procedure;
 
-        struct retour_fonction
+        struct
         {
             expression e;
             char *retour;
-        };
-    };
+        } retour_fonction;
+    } body;
 
 } instruction;
 
@@ -202,7 +202,7 @@ typedef union type
     identifiant id;
     struct
     {
-        identifiant id;
+        identifiant id1;
         expression e1;
         expression e2;
     };
@@ -211,33 +211,33 @@ typedef union type
 
 typedef union declaration
 {
-    struct objet
+    struct
     {
         identifiant *id;
         char *constant;
         type t;
         expression e;
-    };
+    } objet;
 
-    struct declare_type
+    struct
     {
         identifiant id;
         expression e1;
         expression e2;
-    };
+    } declare_type;
 
-    struct subtype
+    struct
     {
         identifiant id;
         type t;
-    };
+    } subtype;
 
-    struct renommage
+    struct
     {
         identifiant *id;
         type t;
         identifiant id_qualifie;
-    };
+    } renommage;
 
     struct procedure
     {
@@ -247,36 +247,36 @@ typedef union declaration
             identifiant *id;
             struct
             {
-                identifiant *id;
-                enum mode
+                identifiant *id1;
+                enum
                 {
                     RIEN,
-                    IN = 'in',
-                    OUT = 'out',
-                    INOUT = 'in out'
-                };
+                    IN,
+                    OUT,
+                    INOUT
+                } mode;
                 identifiant nom_type;
             };
         } * parametres;
-    };
+    } proc;
 
     struct fonction
     {
         struct procedure proc;
         identifiant nom_type_retour;
-    };
+    } fonct;
 
-    struct def
+    struct
     {
-        union proc_func
+        union
         {
             struct procedure p;
             struct fonction f;
-        };
-        declaration *d;
+        } proc_func;
+        union declaration *d;
         instruction *i;
         char *nom;
-    };
+    } def;
 } declaration;
 
 typedef union file
