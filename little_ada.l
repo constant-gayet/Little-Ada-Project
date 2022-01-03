@@ -1,5 +1,5 @@
 %{
-    #include "y.tab.h"
+    #include "little_ada.tab.h"
     int countn=0;
 
     // il faudra surement rajouter (?i) dans les regex pour le case insensitive
@@ -8,18 +8,20 @@
 
 alpha [a-zA-Z]
 digit [0-9]
-
 %%
 
 "--".*                                  { ; }
-"null;"                                 { strcpy(yylval.nd_obj.name,(yytext)); return NULL; } 
+"null;"                                 { strcpy(yylval.nd_obj.name,(yytext)); return IS_NULL; }
+{digit}                                 { strcpy(yylval.nd_obj.name,(yytext)); return DIGIT; }
+[a-f]                                   { strcpy(yylval.nd_obj.name,(yytext)); return LETTER; }
+[a-zA-Z]|("")                           { strcpy(yylval.nd_obj.name,(yytext)); return LETTER; }
 "return"                                { strcpy(yylval.nd_obj.name,(yytext)); return RETURN; }
 "for"	                                { strcpy(yylval.nd_obj.name,(yytext)); return FOR; }
 "in"	                                { strcpy(yylval.nd_obj.name,(yytext)); return IN; }
 "while"	                                { strcpy(yylval.nd_obj.name,(yytext)); return WHILE; }
 "loop"	                                { strcpy(yylval.nd_obj.name,(yytext)); return LOOP; }
 "end loop"	                            { strcpy(yylval.nd_obj.name,(yytext)); return END_LOOP; }
-"begin"	                                { strcpy(yylval.nd_obj.name,(yytext)); return BEGIN; }
+"begin"	                                { strcpy(yylval.nd_obj.name,(yytext)); return BEGAN; }
 "end"	                                { strcpy(yylval.nd_obj.name,(yytext)); return END; }
 "if"	                                { strcpy(yylval.nd_obj.name,(yytext)); return IF; }
 "then"	                                { strcpy(yylval.nd_obj.name,(yytext)); return THEN; }
@@ -64,7 +66,7 @@ digit [0-9]
 "xor"	                                { strcpy(yylval.nd_obj.name,(yytext)); return XOR; }
 "and then"	                            { strcpy(yylval.nd_obj.name,(yytext)); return AND_THEN; }
 "or else"	                            { strcpy(yylval.nd_obj.name,(yytext)); return OR_ELSE; }
-[ \t]*                                  { ; }
+[\t]*                                   { ; }
 [\n]                                    { countn++; }
 .	                                    { return *yytext; }
 %%

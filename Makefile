@@ -1,7 +1,7 @@
 CC=gcc -Wall -Wextra
 BUILD=./build/
-LEX=lex 
-YACC=yacc -d
+LEX=flex 
+YACC=bison -d
 
 #usage commands
 all:clean init $(BUILD)prog
@@ -19,19 +19,19 @@ clean:
 #compiler
 
 
-$(BUILD)lex.yy.c:%.l 
-	$(LEX) $< -o $@
+lex.yy.c: little_ada.l 
+	$(LEX) $< 
 
-$(BUILD)y.tab.h: %.y
-	$(YACC) $< -o $@
+little_ada.tab.h: little_ada.y
+	$(YACC) $< 
 
-$(BUILD)y.tab.c: %.y
-	$(YACC) $< -o $@
+little_ada.tab.c: little_ada.y
+	$(YACC) $< 
 
 $(BUILD)%.o: %.c
 	$(CC) -c $< -o $@
 
-$(BUILD)prog: $(BUILD)lex.yy.c $(BUILD)y.tab.c
+$(BUILD)prog: lex.yy.c little_ada.tab.c
 	$(CC) $^ -o $(BUILD)prog
 
 #dependencies 

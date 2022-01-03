@@ -5,43 +5,37 @@ int yylex();
 #include <stdlib.h>
 %}
 
-%union {char tree; char other; int val;}
+%union { struct var_name { 
+			char name[100]; 
+			struct node* nd;
+		} nd_obj;
+
+		struct var_name2 { 
+			char name[100]; 
+			struct node* nd;
+			char type[5];
+		} nd_obj2; 
+
+		struct var_name3 {
+			char name[100];
+			struct node* nd;
+			char if_body[5];
+			char else_body[5];
+		} nd_obj3;
+	} 
 
 %start file
-%token <nd_obj> EXIT, GOTO, RANGE, CONSTANT, TYPE, IS_RANGE, SUBTYPE, RENAMES,PROCEDURE, FUNCTION, OUT, IN_OUT, CASE, END_CASE, IS, WHEN, OTHER, THEN, END_IF, NULL, RETURN, FOR, IN, IF, ELSIF, ELSE, ID, POWER, NOT, ABS, MULTIPLY, DIVIDE, MOD, REM, ADD, SUBTRACT, EQ, NE, LE, GE, GT, LT, AND, OR, XOR, AND_THEN, OR_ELSE, LOOP, WHILE, END_LOOP, BEGIN, END
-%token 
-%token cte_decimale
-%token cte_base
-%token cte_string
-%token for 
-%token in
-%token
-%token
-%token
-%token RETURN
-%token COMMENTAIRE
-%token case
-%token is
-%token end_case
-
+%token <nd_obj>REVERSE CHAR LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHER  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  BEGAN  END
 
 %type identifiant
-%type <tree> file
-%type <other> file
-%type <val> file
 
-%type reverse
 %%
 // production                                   action
-file        : commentaire file
-            | definition_fonction 
+file        : definition_fonction 
             | definition_procedure 
             ;
 
-commentaire : COMMENTAIRE             {printf('-- %s \n', $1);}
-            ;
-
-identifiant : ID                                {printf('id: %s', $1);}
+identifiant : ID                                
             ;
 identifiant_qualifie    : identifiant_qualifie'.'identifiant    {}
                         | identifiant
@@ -51,6 +45,39 @@ constante   : cte_decimale
             | cte_base
             | cte_string
             ;
+
+cte_decimale: integer 
+            | integer '.' integer 
+            | integer exponent
+            | integer '.' integer exponent 
+integer: DIGIT
+        | integer DIGIT
+        | integer '_' integer
+exponent: 'E' integer 
+        | 'e' integer
+        | 'E' SUBTRACT integer
+        | 'e' SUBTRACT integer
+        | 'E' ADD integer
+        | 'e' ADD integer
+        ;
+
+cte_base: integer '#' based_integer '#'
+        | integer '#' based_integer '.' based_integer '#'
+        | integer '#' based_integer '#' exponent
+        | integer '#' based_integer '.' based_integer '#' exponent
+        ;
+
+based_integer   : DIGIT    
+                | LETTER 
+                | based_integer DIGIT
+                | based_integer LETTER
+                | based_integer '_' based_integer
+                ;
+
+cte_string: '"' string '"'
+string  : CHAR
+        | string CHAR
+        ;
 
 expression  :identifiant_qualifie
             |constante
@@ -71,7 +98,7 @@ expression_virgule  :expression
                     ;
 
 
-instruction :NULL
+instruction :IS_NULL
             |affectation
             |appel_proc
             |boucle_simple
@@ -88,7 +115,7 @@ instruction :NULL
 seq_instructions: instruction| instruction seq_instructions
                 ;
 
-affectation :identifiant_qualifie ':=' expression ';'
+affectation :identifiant_qualifie ":=" expression ';'
             ;
 
 appel_proc : identifiant_qualifie ';'
@@ -105,11 +132,10 @@ boucle_tant_que : identifiant WHILE  expression LOOP seq_instructions END_LOOP i
 boucle_pour_tout_in : expression ':' expression
                     | type
                     ;
-boucle_pour_tout:FOR  identifiant IN reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP ';' 
-                |identifiant FOR  identifiant IN  reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
+boucle_pour_tout:FOR  identifiant IN REVERSE boucle_pour_tout_in LOOP seq_instructions END_LOOP ';' 
+                |identifiant FOR  identifiant IN  REVERSE boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
                 ;
 conditionnelle  : IF expression THEN seq_instructions elsif else END_IF ';'
-                |
                 ;
 else    :%empty
         |ELSE seq_instructions
@@ -120,7 +146,7 @@ elsif   :%empty
         ;
 
 choix: expression
-     | expression '..' expression
+     | expression ".." expression
      | OTHER
      ;
 
@@ -128,7 +154,7 @@ liste_choix: choix
            | choix '|' liste_choix
            ;
 
-alternative: WHEN liste_choix '=>' seq_instructions ;
+alternative: WHEN liste_choix "=>" seq_instructions ;
 
 liste_alternative   : alternative
                     | alternative liste_alternative   
@@ -137,7 +163,7 @@ distinction_cas : CASE expression IS liste_alternative END_CASE ';'
                 ;
 
 saut: etiquette GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
-etiquette: '<<' identifiant '>>';
+etiquette: "<<" identifiant ">>";
 
 exit: EXIT';'
     | EXIT identifiant ';'
@@ -149,7 +175,7 @@ retour_proc: RETURN ';';
 retour_fonction: RETURN expression ';'
 
 type: identifiant_qualifie
-    | identifiant_qualifie RANGE expression '..' expression
+    | identifiant_qualifie RANGE expression ".." expression
     ;
 
 
@@ -167,10 +193,10 @@ declaration_objet   : identifiant_virgule ':' constant type_ou_null definition
 identifiant_virgule : identifiant | identifiant ',' identifiant_virgule ;
 constant: %empty | CONSTANT;
 type_ou_null: %empty|type;
-definition:%empty|':=' expression;
+definition:%empty|":=" expression;
 
 
-declaration_type: TYPE identifiant IS_RANGE expression '..' expression ';';
+declaration_type: TYPE identifiant IS_RANGE expression ".." expression ';';
                 
 declaration_sous_type: SUBTYPE identifiant IS type ';';
 
@@ -187,11 +213,11 @@ mode: %empty | IN | OUT | IN_OUT ;
 specification_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie ';' ;
 
 
-definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations BEGIN seq_instructions END identifiant_qualifie_ou_null';';
+definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations BEGAN seq_instructions END identifiant_qualifie_ou_null';';
 identifiant_qualifie_ou_null: %empty|identifiant_qualifie;
 seq_declarations: %empty | declaration | declaration seq_declarations
 
-definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations BEGIN seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
+definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations BEGAN seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
 
 %%
 
