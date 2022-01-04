@@ -74,8 +74,8 @@ ws      {delim}+
 [a-f]                                   { strcpy(yylval.nd_obj.name,(yytext)); return LETTER; }
 [a-zA-Z]|("")                           { strcpy(yylval.nd_obj.name,(yytext)); return CHAR; }
 [a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*    { strcpy(yylval.nd_obj.name,(yytext)); printf("ID is %s \n", yylval.nd_obj.name); return ID; }
-{ws}                                    { printf("white space eliminated\n"); }
-[\n]                                    { countn++; printf("Line nb : %d \n", countn); }
+{ws}                                    { printf("white space eliminated\n"); ; }
+"\r\n"|[\n]                                    { countn++; }
 .	                                    { return *yytext; }
 %%
 

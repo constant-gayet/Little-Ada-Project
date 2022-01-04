@@ -34,8 +34,9 @@ file        : definition_fonction  {printf("Analisis started successfully");}
             | definition_procedure {printf("Analisis started successfully");}
             ;
 
-identifiant : ID                                
-            ;
+identifiant     : ID    {printf("coucou je suis passé par là");}
+                | ID ';' {printf("coucou je suis passé par là");}
+                ;
 identifiant_qualifie    : identifiant_qualifie'.'identifiant
                         | identifiant
                         ;
@@ -188,7 +189,9 @@ declaration : declaration_objet
 
 declaration_objet   : identifiant_virgule ':' constant type_ou_null definition ';'
                     ;
-identifiant_virgule : identifiant | identifiant ',' identifiant_virgule ;
+identifiant_virgule     : identifiant 
+                        | identifiant ',' identifiant_virgule 
+                        ;
 constant: %empty    {printf("Empty constant");} 
         | CONSTANT
         ;
@@ -222,7 +225,7 @@ definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations D
 ;
 identifiant_qualifie_ou_null: %empty|identifiant_qualifie;
 seq_declarations: %empty 
-                | declaration ';' seq_declarations
+                | declaration seq_declarations
                 ;
 
 definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations DEPART seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
