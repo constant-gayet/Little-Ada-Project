@@ -1723,3 +1723,7 @@ yyreturn:
 
 
 
+int main() {
+    yyparse();
+}
+

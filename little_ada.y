@@ -222,3 +222,7 @@ definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations BEG
 %%
 
 
+int main() {
+    yyparse();
+}
+
