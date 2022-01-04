@@ -25,19 +25,18 @@ int yylex();
 	} 
 
 %start file
-%token <nd_obj>REVERSE CHAR LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHER  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  BEGAN  END
+%token <nd_obj> DEFINE LEFT_QUOTE RIGHT_QUOTE RIGHT_ARROW DOUBLE_POINT REVERSE CHAR LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHER  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  DEPART  END
 
-%type identifiant
-
+%type <nd_obj> file definition_fonction definition_procedure
 %%
 // production                                   action
-file        : definition_fonction 
-            | definition_procedure 
+file        : definition_fonction  {printf("Analisis started successfully");}
+            | definition_procedure {printf("Analisis started successfully");}
             ;
 
 identifiant : ID                                
             ;
-identifiant_qualifie    : identifiant_qualifie'.'identifiant    {}
+identifiant_qualifie    : identifiant_qualifie'.'identifiant
                         | identifiant
                         ;
 
@@ -85,13 +84,11 @@ expression  :identifiant_qualifie
             |ABS expression
             |NOT expression
             |expression symbole expression
-            |expression AND_THEN expression
-            |expression OR_ELSE expression
             |identifiant '(' expression_virgule ')'
             |'(' expression ')'
             ;
 
-symbole : ADD | SUBTRACT | MULTIPLY | DIVIDE | POWER | EQ | NE | LE | GE | LT | GT | MOD | REM | AND | OR | XOR | AND_THEN | OR_ELSE
+symbole : ADD | SUBTRACT | MULTIPLY | DIVIDE | POWER | EQ | NE | LE | GE | LT | GT | MOD | REM | AND | OR | XOR | AND_THEN | OR_ELSE ;
 
 expression_virgule  :expression
                     |expression ',' expression_virgule
@@ -112,10 +109,11 @@ instruction :IS_NULL
             |retour_fonction
             ;            
 
-seq_instructions: instruction| instruction seq_instructions
+seq_instructions: instruction
+                | instruction seq_instructions
                 ;
 
-affectation :identifiant_qualifie ":=" expression ';'
+affectation :identifiant_qualifie DEFINE expression ';'
             ;
 
 appel_proc : identifiant_qualifie ';'
@@ -141,12 +139,11 @@ else    :%empty
         |ELSE seq_instructions
         ;
 elsif   :%empty
-        |ELSIF expression THEN seq_instructions else 
         |ELSIF expression THEN seq_instructions else elsif
         ;
 
 choix: expression
-     | expression ".." expression
+     | expression DOUBLE_POINT expression
      | OTHER
      ;
 
@@ -154,7 +151,7 @@ liste_choix: choix
            | choix '|' liste_choix
            ;
 
-alternative: WHEN liste_choix "=>" seq_instructions ;
+alternative: WHEN liste_choix RIGHT_ARROW seq_instructions ;
 
 liste_alternative   : alternative
                     | alternative liste_alternative   
@@ -163,7 +160,7 @@ distinction_cas : CASE expression IS liste_alternative END_CASE ';'
                 ;
 
 saut: etiquette GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
-etiquette: "<<" identifiant ">>";
+etiquette: LEFT_QUOTE identifiant RIGHT_QUOTE;
 
 exit: EXIT';'
     | EXIT identifiant ';'
@@ -172,10 +169,10 @@ exit: EXIT';'
 
 retour_proc: RETURN ';';
 
-retour_fonction: RETURN expression ';'
+retour_fonction: RETURN expression ';';
 
 type: identifiant_qualifie
-    | identifiant_qualifie RANGE expression ".." expression
+    | identifiant_qualifie RANGE expression DOUBLE_POINT expression
     ;
 
 
@@ -189,20 +186,28 @@ declaration : declaration_objet
             | definition_fonction
             ;
 
-declaration_objet   : identifiant_virgule ':' constant type_ou_null definition 
+declaration_objet   : identifiant_virgule ':' constant type_ou_null definition ';'
+                    ;
 identifiant_virgule : identifiant | identifiant ',' identifiant_virgule ;
-constant: %empty | CONSTANT;
-type_ou_null: %empty|type;
-definition:%empty|":=" expression;
+constant: %empty    {printf("Empty constant");} 
+        | CONSTANT
+        ;
+type_ou_null: %empty {printf("Empty type");}
+            |type
+            ;
+definition  :%empty {printf("Empty declaration");}
+            |DEFINE expression   
+            ;
 
 
-declaration_type: TYPE identifiant IS_RANGE expression ".." expression ';';
+declaration_type: TYPE identifiant IS_RANGE expression DOUBLE_POINT expression ';';
                 
 declaration_sous_type: SUBTYPE identifiant IS type ';';
 
 renommage: identifiant_virgule ':' type RENAMES identifiant_qualifie ';'
 
-specification_procedure: PROCEDURE identifiant seq_parametres ';';
+specification_procedure: PROCEDURE identifiant seq_parametres ';'             {printf("blalala");}
+                        ;
 
 seq_parametres: %empty | '(' parametres ')';
 parametres: parametres1 ':' mode identifiant_qualifie;
@@ -213,16 +218,23 @@ mode: %empty | IN | OUT | IN_OUT ;
 specification_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie ';' ;
 
 
-definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations BEGAN seq_instructions END identifiant_qualifie_ou_null';';
+definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations DEPART seq_instructions END identifiant_qualifie_ou_null';' {printf("definition_procedure");}
+;
 identifiant_qualifie_ou_null: %empty|identifiant_qualifie;
-seq_declarations: %empty | declaration | declaration seq_declarations
+seq_declarations: %empty 
+                | declaration ';' seq_declarations
+                ;
 
-definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations BEGAN seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
+definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations DEPART seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
 
 %%
-
+extern int countn;
 
 int main() {
-    yyparse();
+    yyparse(); //lancer l'analyse syntaxique
 }
 
+
+void yyerror(char* s) {
+    fprintf(stderr, "On line %d : %s on object \n %s", countn, s, yylval.nd_obj.name); 
+}

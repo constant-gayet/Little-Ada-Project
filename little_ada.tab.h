@@ -54,62 +54,67 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    REVERSE = 258,                 /* REVERSE  */
-    CHAR = 259,                    /* CHAR  */
-    LETTER = 260,                  /* LETTER  */
-    DIGIT = 261,                   /* DIGIT  */
-    EXIT = 262,                    /* EXIT  */
-    GOTO = 263,                    /* GOTO  */
-    RANGE = 264,                   /* RANGE  */
-    CONSTANT = 265,                /* CONSTANT  */
-    TYPE = 266,                    /* TYPE  */
-    IS_RANGE = 267,                /* IS_RANGE  */
-    SUBTYPE = 268,                 /* SUBTYPE  */
-    RENAMES = 269,                 /* RENAMES  */
-    PROCEDURE = 270,               /* PROCEDURE  */
-    FUNCTION = 271,                /* FUNCTION  */
-    OUT = 272,                     /* OUT  */
-    IN_OUT = 273,                  /* IN_OUT  */
-    CASE = 274,                    /* CASE  */
-    END_CASE = 275,                /* END_CASE  */
-    IS = 276,                      /* IS  */
-    WHEN = 277,                    /* WHEN  */
-    OTHER = 278,                   /* OTHER  */
-    THEN = 279,                    /* THEN  */
-    END_IF = 280,                  /* END_IF  */
-    IS_NULL = 281,                 /* IS_NULL  */
-    RETURN = 282,                  /* RETURN  */
-    FOR = 283,                     /* FOR  */
-    IN = 284,                      /* IN  */
-    IF = 285,                      /* IF  */
-    ELSIF = 286,                   /* ELSIF  */
-    ELSE = 287,                    /* ELSE  */
-    ID = 288,                      /* ID  */
-    POWER = 289,                   /* POWER  */
-    NOT = 290,                     /* NOT  */
-    ABS = 291,                     /* ABS  */
-    MULTIPLY = 292,                /* MULTIPLY  */
-    DIVIDE = 293,                  /* DIVIDE  */
-    MOD = 294,                     /* MOD  */
-    REM = 295,                     /* REM  */
-    ADD = 296,                     /* ADD  */
-    SUBTRACT = 297,                /* SUBTRACT  */
-    EQ = 298,                      /* EQ  */
-    NE = 299,                      /* NE  */
-    LE = 300,                      /* LE  */
-    GE = 301,                      /* GE  */
-    GT = 302,                      /* GT  */
-    LT = 303,                      /* LT  */
-    AND = 304,                     /* AND  */
-    OR = 305,                      /* OR  */
-    XOR = 306,                     /* XOR  */
-    AND_THEN = 307,                /* AND_THEN  */
-    OR_ELSE = 308,                 /* OR_ELSE  */
-    LOOP = 309,                    /* LOOP  */
-    WHILE = 310,                   /* WHILE  */
-    END_LOOP = 311,                /* END_LOOP  */
-    BEGAN = 312,                   /* BEGAN  */
-    END = 313                      /* END  */
+    DEFINE = 258,                  /* DEFINE  */
+    LEFT_QUOTE = 259,              /* LEFT_QUOTE  */
+    RIGHT_QUOTE = 260,             /* RIGHT_QUOTE  */
+    RIGHT_ARROW = 261,             /* RIGHT_ARROW  */
+    DOUBLE_POINT = 262,            /* DOUBLE_POINT  */
+    REVERSE = 263,                 /* REVERSE  */
+    CHAR = 264,                    /* CHAR  */
+    LETTER = 265,                  /* LETTER  */
+    DIGIT = 266,                   /* DIGIT  */
+    EXIT = 267,                    /* EXIT  */
+    GOTO = 268,                    /* GOTO  */
+    RANGE = 269,                   /* RANGE  */
+    CONSTANT = 270,                /* CONSTANT  */
+    TYPE = 271,                    /* TYPE  */
+    IS_RANGE = 272,                /* IS_RANGE  */
+    SUBTYPE = 273,                 /* SUBTYPE  */
+    RENAMES = 274,                 /* RENAMES  */
+    PROCEDURE = 275,               /* PROCEDURE  */
+    FUNCTION = 276,                /* FUNCTION  */
+    OUT = 277,                     /* OUT  */
+    IN_OUT = 278,                  /* IN_OUT  */
+    CASE = 279,                    /* CASE  */
+    END_CASE = 280,                /* END_CASE  */
+    IS = 281,                      /* IS  */
+    WHEN = 282,                    /* WHEN  */
+    OTHER = 283,                   /* OTHER  */
+    THEN = 284,                    /* THEN  */
+    END_IF = 285,                  /* END_IF  */
+    IS_NULL = 286,                 /* IS_NULL  */
+    RETURN = 287,                  /* RETURN  */
+    FOR = 288,                     /* FOR  */
+    IN = 289,                      /* IN  */
+    IF = 290,                      /* IF  */
+    ELSIF = 291,                   /* ELSIF  */
+    ELSE = 292,                    /* ELSE  */
+    ID = 293,                      /* ID  */
+    POWER = 294,                   /* POWER  */
+    NOT = 295,                     /* NOT  */
+    ABS = 296,                     /* ABS  */
+    MULTIPLY = 297,                /* MULTIPLY  */
+    DIVIDE = 298,                  /* DIVIDE  */
+    MOD = 299,                     /* MOD  */
+    REM = 300,                     /* REM  */
+    ADD = 301,                     /* ADD  */
+    SUBTRACT = 302,                /* SUBTRACT  */
+    EQ = 303,                      /* EQ  */
+    NE = 304,                      /* NE  */
+    LE = 305,                      /* LE  */
+    GE = 306,                      /* GE  */
+    GT = 307,                      /* GT  */
+    LT = 308,                      /* LT  */
+    AND = 309,                     /* AND  */
+    OR = 310,                      /* OR  */
+    XOR = 311,                     /* XOR  */
+    AND_THEN = 312,                /* AND_THEN  */
+    OR_ELSE = 313,                 /* OR_ELSE  */
+    LOOP = 314,                    /* LOOP  */
+    WHILE = 315,                   /* WHILE  */
+    END_LOOP = 316,                /* END_LOOP  */
+    DEPART = 317,                  /* DEPART  */
+    END = 318                      /* END  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -138,7 +143,7 @@ union YYSTYPE
 		} nd_obj3;
 	
 
-#line 142 "little_ada.tab.h"
+#line 147 "little_ada.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
