@@ -1,10 +1,12 @@
 %{
     #include "little_ada.tab.h"
-    int countn=1;
+    /* compteur de ligne utile pour détailler l'affichage d'erreurs*/
+    int countn=1; 
 
 %}
 %option yylineno
 
+/* expressions regulieres generiques */
 alpha   [a-zA-Z]
 int     ([0-9]+(_([0-9])+)*)
 int_letter ([0-9a-fA-F]+(_([0-9a-fA-F])+)*)

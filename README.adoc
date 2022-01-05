@@ -8,4 +8,6 @@ http://web4.ensiie.fr/~guillaume.burel/compilation/projet_little_Ada.pdf[Lien ve
 
 * `make test` pour exécuter les tests sur les fichiers valides
 
+* `make testKO` pour exécuter les tests sur les fichiers invalides
+
 * `make clean` pour supprimer l'ensemble des fichiers compilés

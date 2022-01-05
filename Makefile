@@ -15,6 +15,11 @@ test: prog
 		./prog < $$filename ; \
 	done
 
+testKO: prog
+	for filename in ./tests/KO/* ;	do \
+		./prog < $$filename ; \
+	done
+
 #test: 
 
 clean:

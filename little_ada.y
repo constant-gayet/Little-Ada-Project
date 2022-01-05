@@ -402,7 +402,6 @@ int main() {
         yyparse(); //lancer l'analyse syntaxique
 	printf("Les constantes sont : \n \n");
         print_consts(head);
-        check_affect();
 }
 
 /* affiche toutes les constantes lues par le parser, peu importe leur nature  */
@@ -410,11 +409,13 @@ void print_consts(struct node *tree) {
         if (tree->left) {
 		print_consts(tree->left);
 	}
-        
-        if(strcmp(tree->token,"constante")==0){
-	        printf("Constante : ");
-                printf("%s, ", tree->left->token);
-                printf("\n");
+        if(tree->token)
+        {
+                if(strcmp(tree->token,"constante")==0){
+	                printf("Constante : ");
+                        printf("%s, ", tree->left->token);
+                        printf("\n");
+        }
         }
 	if (tree->right) {
 		print_consts(tree->right);
