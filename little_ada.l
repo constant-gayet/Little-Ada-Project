@@ -29,7 +29,7 @@ eol     "\r\n"|[\n]
 (?i:while)	                                { strcpy(yylval.nd_obj.name,(yytext)); return WHILE; }
 (?i:loop)	                                { strcpy(yylval.nd_obj.name,(yytext)); return LOOP; }
 (?i:"end loop;")|(?i:"end loop ")           { strcpy(yylval.nd_obj.name,(yytext)); return END_LOOP; }
-(?i:begin)	                                { strcpy(yylval.nd_obj.name,(yytext)); return DEPART; }
+(?i:begin)	                                { strcpy(yylval.nd_obj.name,(yytext)); printf("begin has passed \n");return DEPART; }
 (?i:if)	                                    { strcpy(yylval.nd_obj.name,(yytext)); return IF; }
 (?i:then)	                                { strcpy(yylval.nd_obj.name,(yytext)); return THEN; }
 (?i:elsif)	                                { strcpy(yylval.nd_obj.name,(yytext)); return ELSIF; }
@@ -38,7 +38,7 @@ eol     "\r\n"|[\n]
 (?i:others)                                 { strcpy(yylval.nd_obj.name,(yytext)); return OTHERS; }
 (?i:when)	                                { strcpy(yylval.nd_obj.name,(yytext)); return WHEN; }
 (?i:case)	                                { strcpy(yylval.nd_obj.name,(yytext)); return CASE; }
-(?i:is)	                                    { strcpy(yylval.nd_obj.name,(yytext)); return IS; }
+(?i:is)	                                    { strcpy(yylval.nd_obj.name,(yytext)); printf("is has passed \n");return IS; }
 (?i:"end case;")	                        { strcpy(yylval.nd_obj.name,(yytext)); printf("\n");return END_CASE; }
 (?i:end)	                                { strcpy(yylval.nd_obj.name,(yytext)); return END; }
 (?i:exit)	                                { strcpy(yylval.nd_obj.name,(yytext)); return EXIT_TOKEN; }

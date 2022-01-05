@@ -144,7 +144,7 @@ liste_alternative   : alternative
 distinction_cas : CASE expression IS liste_alternative END_CASE
                 ;
 
-saut: etiquette GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
+saut: GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
 etiquette: LEFT_QUOTE identifiant RIGHT_QUOTE;
 
 exit: EXIT_TOKEN';'
@@ -201,7 +201,7 @@ parametres1: identifiant_virgule | identifiant_virgule ';' parametres1 ;
 mode: %empty | IN | OUT | IN_OUT ;
 
 
-specification_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie ';' ;
+specification_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie ';' 
 
 
 definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations DEPART seq_instructions END identifiant_qualifie_ou_null';'
@@ -211,7 +211,7 @@ seq_declarations: %empty
                 | declaration seq_declarations
                 ;
 
-definition_fonction: FUNCTION identifiant seq_parametres IS seq_declarations DEPART seq_instructions  RETURN identifiant_qualifie ';' END identifiant_qualifie_ou_null ';' ;
+definition_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie IS seq_declarations DEPART seq_instructions END identifiant_qualifie_ou_null ';' ;
 
 %%
 extern int countn;
@@ -222,5 +222,5 @@ int main() {
 
 
 void yyerror(char* s) {
-    fprintf(stderr, "On line %d : %s on object \n %s", countn, s, yylval.nd_obj.name); 
+    fprintf(stderr, "On line %d : %s on object %s \n", countn, s, yylval.nd_obj.name); 
 }
