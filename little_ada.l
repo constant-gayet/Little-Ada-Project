@@ -2,7 +2,6 @@
     #include "little_ada.tab.h"
     int countn=1;
 
-    // il faudra surement rajouter (?i) dans les regex pour le case insensitive
 %}
 %option yylineno
 

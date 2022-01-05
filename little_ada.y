@@ -187,14 +187,12 @@ declaration : declaration_objet
             | definition_fonction
             ;
 
-declaration_objet   : identifiant_virgule ':' constant type_ou_null definition ';'     
+declaration_objet: identifiant_virgule ':' type_ou_null definition ';'     
+                 |identifiant_virgule ':' CONSTANT type_ou_null definition ';'        
                     ;
 identifiant_virgule     : identifiant
                         | identifiant ',' identifiant_virgule 
                         ;
-constant: CONSTANT
-        |%empty
-        ;
 type_ou_null:type
             |%empty
             ;
