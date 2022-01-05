@@ -1,0 +1,11 @@
+Projet du cours d'assembleur/compilation de deuxième année du cycle d'ingénieur de l'ENSIIE
+
+http://web4.ensiie.fr/~guillaume.burel/compilation/projet_little_Ada.pdf[Lien vers le sujet du projet]
+
+== Commandes
+
+* `make` pour compiler le projet
+
+* `make test` pour exécuter les tests sur les fichiers valides
+
+* `make clean` pour supprimer l'ensemble des fichiers compilés
