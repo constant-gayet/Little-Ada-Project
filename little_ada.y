@@ -25,17 +25,16 @@ int yylex();
 	} 
 
 %start file
-%token <nd_obj> DEFINE LEFT_QUOTE RIGHT_QUOTE RIGHT_ARROW DOUBLE_POINT REVERSE CHAR LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHER  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  DEPART  END
+%token <nd_obj> DEFINE LEFT_QUOTE RIGHT_QUOTE RIGHT_ARROW DOUBLE_POINT REVERSE STRING LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHERS  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  DEPART  END
 
 %type <nd_obj> file definition_fonction definition_procedure
 %%
 // production                                   action
-file        : definition_fonction  {printf("Analisis started successfully");}
-            | definition_procedure {printf("Analisis started successfully");}
+file        : definition_fonction  {printf("Analysis ended successfully\n");}
+            | definition_procedure {printf("Analysis ended successfully\n");}
             ;
 
-identifiant     : ID    {printf("coucou je suis passé par là");}
-                | ID ';' {printf("coucou je suis passé par là");}
+identifiant     : ID
                 ;
 identifiant_qualifie    : identifiant_qualifie'.'identifiant
                         | identifiant
@@ -43,7 +42,7 @@ identifiant_qualifie    : identifiant_qualifie'.'identifiant
 
 constante   : cte_decimale
             | cte_base
-            | cte_string
+            | STRING
             ;
 
 cte_decimale: integer 
@@ -74,11 +73,6 @@ based_integer   : DIGIT
                 | based_integer '_' based_integer
                 ;
 
-cte_string: '"' string '"'
-string  : CHAR
-        | string CHAR
-        ;
-
 expression  :identifiant_qualifie
             |constante
             |SUBTRACT expression
@@ -96,7 +90,7 @@ expression_virgule  :expression
                     ;
 
 
-instruction :IS_NULL
+instruction :null
             |affectation
             |appel_proc
             |boucle_simple
@@ -110,6 +104,9 @@ instruction :IS_NULL
             |retour_fonction
             ;            
 
+null: IS_NULL
+        |IS_NULL';'
+
 seq_instructions: instruction
                 | instruction seq_instructions
                 ;
@@ -122,19 +119,22 @@ appel_proc : identifiant_qualifie ';'
             ;
 
 
-boucle_simple   : LOOP seq_instructions END_LOOP ';'                   
+boucle_simple   : LOOP seq_instructions END_LOOP                   
                 |identifiant ':' LOOP seq_instructions END_LOOP identifiant ';'            //todo check id
                 ;
 boucle_tant_que : identifiant WHILE  expression LOOP seq_instructions END_LOOP identifiant ';'  
-                | WHILE  expression LOOP seq_instructions END_LOOP ';'
+                | WHILE  expression LOOP seq_instructions END_LOOP
                 ;
-boucle_pour_tout_in : expression ':' expression
+boucle_pour_tout_in : expression DOUBLE_POINT expression
                     | type
                     ;
-boucle_pour_tout:FOR  identifiant IN REVERSE boucle_pour_tout_in LOOP seq_instructions END_LOOP ';' 
-                |identifiant FOR  identifiant IN  REVERSE boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
+boucle_pour_tout:FOR  identifiant IN reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP 
+                |identifiant FOR  identifiant IN  reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
+
+reverse: REVERSE
+        |%empty 
                 ;
-conditionnelle  : IF expression THEN seq_instructions elsif else END_IF ';'
+conditionnelle  : IF expression THEN seq_instructions elsif else END_IF
                 ;
 else    :%empty
         |ELSE seq_instructions
@@ -145,7 +145,7 @@ elsif   :%empty
 
 choix: expression
      | expression DOUBLE_POINT expression
-     | OTHER
+     | OTHERS
      ;
 
 liste_choix: choix
@@ -157,7 +157,7 @@ alternative: WHEN liste_choix RIGHT_ARROW seq_instructions ;
 liste_alternative   : alternative
                     | alternative liste_alternative   
                     ;
-distinction_cas : CASE expression IS liste_alternative END_CASE ';'
+distinction_cas : CASE expression IS liste_alternative END_CASE
                 ;
 
 saut: etiquette GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
@@ -177,7 +177,7 @@ type: identifiant_qualifie
     ;
 
 
-declaration : declaration_objet
+declaration : declaration_objet         
             | declaration_type
             | declaration_sous_type
             | renommage
@@ -187,19 +187,19 @@ declaration : declaration_objet
             | definition_fonction
             ;
 
-declaration_objet   : identifiant_virgule ':' constant type_ou_null definition ';'
+declaration_objet   : identifiant_virgule ':' constant type_ou_null definition ';'     
                     ;
-identifiant_virgule     : identifiant 
+identifiant_virgule     : identifiant
                         | identifiant ',' identifiant_virgule 
                         ;
-constant: %empty    {printf("Empty constant");} 
-        | CONSTANT
+constant: CONSTANT
+        |%empty
         ;
-type_ou_null: %empty {printf("Empty type");}
-            |type
+type_ou_null:type
+            |%empty
             ;
-definition  :%empty {printf("Empty declaration");}
-            |DEFINE expression   
+definition  :DEFINE expression   
+            |%empty
             ;
 
 
@@ -209,10 +209,11 @@ declaration_sous_type: SUBTYPE identifiant IS type ';';
 
 renommage: identifiant_virgule ':' type RENAMES identifiant_qualifie ';'
 
-specification_procedure: PROCEDURE identifiant seq_parametres ';'             {printf("blalala");}
+specification_procedure: PROCEDURE identifiant seq_parametres ';'             
                         ;
 
-seq_parametres: %empty | '(' parametres ')';
+seq_parametres: %empty
+                 | '(' parametres ')';
 parametres: parametres1 ':' mode identifiant_qualifie;
 parametres1: identifiant_virgule | identifiant_virgule ';' parametres1 ;
 mode: %empty | IN | OUT | IN_OUT ;
@@ -221,7 +222,7 @@ mode: %empty | IN | OUT | IN_OUT ;
 specification_fonction: FUNCTION identifiant seq_parametres RETURN identifiant_qualifie ';' ;
 
 
-definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations DEPART seq_instructions END identifiant_qualifie_ou_null';' {printf("definition_procedure");}
+definition_procedure: PROCEDURE identifiant seq_parametres IS seq_declarations DEPART seq_instructions END identifiant_qualifie_ou_null';'
 ;
 identifiant_qualifie_ou_null: %empty|identifiant_qualifie;
 seq_declarations: %empty 
