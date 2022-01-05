@@ -1,3 +1,0 @@
-procedure BoolVars is
-
-    Correct : 
