@@ -144,8 +144,11 @@ liste_alternative   : alternative
 distinction_cas : CASE expression IS liste_alternative END_CASE
                 ;
 
-saut: GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
-etiquette: LEFT_QUOTE identifiant RIGHT_QUOTE;
+saut    : GOTO identifiant ';' etiquette
+        ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
+etiquette       : LEFT_QUOTE identifiant RIGHT_QUOTE seq_instructions saut
+                | LEFT_QUOTE identifiant RIGHT_QUOTE seq_instructions 
+                ;
 
 exit: EXIT_TOKEN';'
     | EXIT_TOKEN identifiant ';'
