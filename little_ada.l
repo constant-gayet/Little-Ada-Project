@@ -29,7 +29,7 @@ eol     "\r\n"|[\n]
 (?i:while)	                                { strcpy(yylval.nd_obj.name,(yytext)); return WHILE; }
 (?i:loop)	                                { strcpy(yylval.nd_obj.name,(yytext)); return LOOP; }
 (?i:"end loop;")|(?i:"end loop ")           { strcpy(yylval.nd_obj.name,(yytext)); return END_LOOP; }
-(?i:begin)	                                { strcpy(yylval.nd_obj.name,(yytext)); printf("begin has passed \n");return DEPART; }
+(?i:begin)	                                { strcpy(yylval.nd_obj.name,(yytext)); return DEPART; }
 (?i:if)	                                    { strcpy(yylval.nd_obj.name,(yytext)); return IF; }
 (?i:then)	                                { strcpy(yylval.nd_obj.name,(yytext)); return THEN; }
 (?i:elsif)	                                { strcpy(yylval.nd_obj.name,(yytext)); return ELSIF; }
@@ -38,8 +38,8 @@ eol     "\r\n"|[\n]
 (?i:others)                                 { strcpy(yylval.nd_obj.name,(yytext)); return OTHERS; }
 (?i:when)	                                { strcpy(yylval.nd_obj.name,(yytext)); return WHEN; }
 (?i:case)	                                { strcpy(yylval.nd_obj.name,(yytext)); return CASE; }
-(?i:is)	                                    { strcpy(yylval.nd_obj.name,(yytext)); printf("is has passed \n");return IS; }
-(?i:"end case;")	                        { strcpy(yylval.nd_obj.name,(yytext)); printf("\n");return END_CASE; }
+(?i:is)	                                    { strcpy(yylval.nd_obj.name,(yytext)); return IS; }
+(?i:"end case;")	                        { strcpy(yylval.nd_obj.name,(yytext)); return END_CASE; }
 (?i:end)	                                { strcpy(yylval.nd_obj.name,(yytext)); return END; }
 (?i:exit)	                                { strcpy(yylval.nd_obj.name,(yytext)); return EXIT_TOKEN; }
 (?i:goto)	                                { strcpy(yylval.nd_obj.name,(yytext)); return GOTO; }
@@ -75,9 +75,9 @@ eol     "\r\n"|[\n]
 (?i:"or else")	                            { strcpy(yylval.nd_obj.name,(yytext)); return OR_ELSE; }
 [eE][+-]?{int}                              { strcpy(yylval.nd_obj.name,(yytext)); return EXP; }
 {based_int}                                 { strcpy(yylval.nd_obj.name,(yytext)); return BASED_INT; }
-{int}                                       { strcpy(yylval.nd_obj.name,(yytext)); printf("int : %s\n",yytext);return INT; }
+{int}                                       { strcpy(yylval.nd_obj.name,(yytext)); return INT; }
 ["].*["]                                    { strcpy(yylval.nd_obj.name,(yytext)); return STRING; }
-[a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*        { strcpy(yylval.nd_obj.name,(yytext)); printf("ID is %s \n", yylval.nd_obj.name); return ID; }
+[a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*        { strcpy(yylval.nd_obj.name,(yytext)); return ID; }
 {ws}                                        { ; }
 {eol}                                       { countn++; }
 .	                                        { return *yytext; }

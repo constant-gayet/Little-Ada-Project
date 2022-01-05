@@ -10,6 +10,11 @@ run: prog
 
 update: prog
 
+test: prog
+	for filename in ./tests/OK/* ;	do \
+		./prog < $$filename ; \
+	done
+
 #test: 
 
 clean:

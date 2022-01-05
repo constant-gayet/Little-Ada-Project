@@ -40,7 +40,7 @@ identifiant_qualifie    : identifiant_qualifie'.'identifiant
                         | identifiant
                         ;
 
-constante   : cte_decimale {printf("conste;\n");}
+constante   : cte_decimale 
             | cte_base
             | STRING
             ;
@@ -112,7 +112,7 @@ boucle_tant_que : identifiant WHILE  expression LOOP seq_instructions END_LOOP i
 boucle_pour_tout_in : expression DOUBLE_POINT expression
                     | type
                     ;
-boucle_pour_tout:FOR identifiant IN boucle_pour_tout_in LOOP seq_instructions END_LOOP 
+boucle_pour_tout:FOR identifiant IN reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP 
                 |identifiant ':' FOR  identifiant IN  reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
 
 reverse: REVERSE
