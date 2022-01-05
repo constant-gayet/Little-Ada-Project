@@ -52,4 +52,7 @@ Mkfile.old
 dkms.conf
 
 #compiled files
-build/prog
+little_ada.tab.c
+little_ada.tab.h
+lex.yy.c
+prog
