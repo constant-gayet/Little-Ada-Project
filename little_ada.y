@@ -5,15 +5,31 @@ int yylex();
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+/* definition du type liste  */
+struct element
+{
+    char* val;
+    struct element *nxt;
+};
+typedef struct element element;
+ 
+typedef element* list;
 
 struct node* mknode(struct node *left, struct node *right, char *token);
+int stricmp(char const *a, char const *b);
+void print_tree(struct node *tree);
+void print_consts(struct node *tree);
+void check_affect();
+list push(char* valeur, list liste);
+
+
 struct node {
   struct node *left;
   struct node *right;
   char *token;     
 };
 struct node *head;
-
+list seen_const = NULL;
 %}
 
 %union { struct var_name { 
@@ -27,12 +43,19 @@ struct node *head;
 
 %type <nd_obj>conditionnelle else elsif reverse choix liste_choix alternative liste_alternative distinction_cas saut etiquette exit retour_fonction retour_proc type declaration declaration_objet identifiant_virgule type_ou_null definition declaration_type declaration_sous_type renommage specification_procedure seq_parametres parametres mode specification_fonction definition_procedure identifiant_qualifie_ou_null seq_declarations file definition_fonction identifiant identifiant_qualifie constante cte_decimale cte_base expression expression_virgule symbole instruction seq_instructions affectation appel_proc boucle_simple boucle_pour_tout expressions_double_point boucle_pour_tout_in boucle_tant_que
 %%
-// production                                                                   action
-file        : definition_fonction                                               {printf("Analysis ended successfully\n"); $$.nd = mknode($1.nd, NULL, "file"); head=$$.nd;}
+// Pour chaque régle on définit une ou des actions à réaliser
+/* Majoritairement, on créée des noeuds selon la structure (struct node *) définie ci-dessus à chaque passage dans un non-terminal. Celui-ci peut avoir 0,1 ou 2 fils. Par défaut, si 
+le noeud comporte 1 fils, on le mettra à gauche
+Par ailleurs, à certains passages, lorsque l'on veut récupérer les valeurs des noeuds (pour pouvoir les traiter ou les afficher, typiquement des constantes) on la sauvegarde dans la valeur du noeud
+*/
+
+/* Règles   -----------------------------------------------------------------   Actions*/
+
+file        : definition_fonction                                               {printf("Analysis ended successfully\n"); $$.nd = mknode($1.nd, NULL, "file"); head=$$.nd;} //Départ de la lecture du fichier 
             | definition_procedure                                              {printf("Analysis ended successfully\n"); $$.nd = mknode($1.nd, NULL, "file"); head=$$.nd;}
             ;
 
-identifiant     : ID                                                            {strcpy($$.name,$1.name);}                                                                                                        
+identifiant     : ID                                                            {$1.nd = mknode(NULL,NULL,$1.name); $$.nd = mknode($1.nd,NULL,"identifiant");}                                                                                                        
                 ;               
 identifiant_qualifie    : identifiant_qualifie'.'identifiant                    {char *id_qual; id_qual = malloc(100); strcpy(id_qual,$1.name);strcat(id_qual,".");strcat(id_qual,$3.name); strcpy($$.name,id_qual);}    
                         | identifiant                                           {strcpy($$.name,$1.name);}    
@@ -50,7 +73,7 @@ cte_decimale: INT                                                               
             ;
 
 cte_base: BASED_INT                                                             {strcpy($$.name,$1.name);}
-        | BASED_INT EXP                                                         {char const_val[100]; strcpy(const_val, $1.name); strcpy(const_val,$2.name); strcpy($$.name, const_val);}
+        | BASED_INT EXP                                                         {char const_val[100]; strcpy(const_val, $1.name); strcat(const_val,$2.name); strcpy($$.name, const_val);}
         ;
 
 expression  :identifiant_qualifie                                               {$1.nd = mknode(NULL,NULL,$1.name); $$.nd = mknode($1.nd,NULL,"id");}
@@ -212,11 +235,12 @@ declaration : declaration_objet                                                 
 
 declaration_objet: identifiant_virgule ':' type_ou_null definition ';'          {
                                                                                         struct node* tmp_node = mknode($3.nd, $4.nd, "declaration objet membre droit");
-                                                                                        $$.nd = mknode($1.nd,tmp_node,"declration objet");
+                                                                                        $$.nd = mknode($1.nd,tmp_node,"declaration objet");
                                                                                 }
                  |identifiant_virgule ':' CONSTANT type_ou_null definition ';'  {
-                                                                                        struct node* tmp_node = mknode($3.nd, $4.nd, "declaration objet membre droit constant");
-                                                                                        $$.nd = mknode($1.nd,tmp_node,"declration objet");
+                                                                                        push($1.name, seen_const);
+                                                                                        struct node* tmp_node = mknode($4.nd, $5.nd, "declaration objet membre droit constant");
+                                                                                        $$.nd = mknode($1.nd,tmp_node,"declaration objet");
                                                                                 }      
                     ;
 identifiant_virgule     : identifiant                                           {$$.nd = $1.nd;}
@@ -225,7 +249,7 @@ identifiant_virgule     : identifiant                                           
 type_ou_null:type                                                               {$$.nd=$1.nd;}
             |%empty                                                             {$$.nd=NULL;}
             ;
-definition  :DEFINE expression                                                  {$$.nd=mknode($1.nd,NULL,"define");}          
+definition  :DEFINE expression                                                  {$$.nd=mknode($2.nd,NULL,"define");}          
             |%empty                                                             {$$.nd=NULL;}
             ;
 
@@ -290,8 +314,111 @@ definition_fonction     : FUNCTION identifiant seq_parametres RETURN identifiant
 %%
 extern int countn;
 
+/* FONTIONS UTILES A LA GESTION DES LISTES ET DES OPERATIONS SUR CELLES-CI */
+list push(char* valeur, list liste)
+{
+    /* On crée un nouvel élément */
+    element* nouvelElement = malloc(sizeof(element));
+ 
+    /* On assigne la valeur au nouvel élément */
+    nouvelElement->val = valeur;
+ 
+    /* On ajoute en fin, donc aucun élément ne va suivre */
+    nouvelElement->nxt = NULL;
+ 
+    if(liste == NULL)
+    {
+        /* Si la liste est videé il suffit de renvoyer l'élément créé */
+        return nouvelElement;
+    }
+    else
+    {
+        /* Sinon, on parcourt la liste à l'aide d'un pointeur temporaire et on
+        indique que le dernier élément de la liste est relié au nouvel élément */
+        element* temp=liste;
+        while(temp->nxt != NULL)
+        {
+            temp = temp->nxt;
+        }
+        temp->nxt = nouvelElement;
+        return liste;
+    }
+}
+
+/* retourne true si valeur est dans liste, false sinon  */
+int mem(char* valeur, list liste)
+{
+    element *tmp=liste;
+    /* Tant que l'on n'est pas au bout de la liste */
+    while(tmp != NULL)
+    {
+        if(tmp->val == valeur)
+        {
+            /* Si l'élément a la valeur recherchée, on renvoie son adresse */
+            return 1;
+        }
+        tmp = tmp->nxt;
+    }
+    return 0;
+}
+
+/* renvoie la première occurrence de valeur dans la liste  "liste" */
+list rechercherElement(list liste, char* valeur)
+{
+    element *tmp=liste;
+    /* Tant que l'on n'est pas au bout de la liste */
+    while(tmp != NULL)
+    {
+        if(strcmp(tmp->val, valeur)==0)
+        {
+            /* Si l'élément a la valeur recherchée, on renvoie son adresse */
+            return tmp;
+        }
+        tmp = tmp->nxt;
+    }
+    return NULL;
+}
+
+/* Affichage de l'arbre : utile pour se rendre compte de sa construction */
+void print_inorder(struct node *tree) {
+	if (tree->left) {
+		print_inorder(tree->left);
+	}
+	printf("%s, ", tree->token);
+	if (tree->right) {
+		print_inorder(tree->right);
+	}
+}
+void print_tree(struct node* tree) {
+	// print_tree_util(tree, 0);
+	printf("\n\nInorder traversal of the Parse Tree is: \n\n");
+	print_inorder(tree);
+}
+/* -------------------------------------------------------------------------- */
+
+
 int main() {
-    yyparse(); //lancer l'analyse syntaxique
+        
+        yyparse(); //lancer l'analyse syntaxique
+	printf("Les constantes sont : \n \n");
+        print_consts(head);
+        check_affect();
+}
+
+/* affiche toutes les constantes lues par le parser, peu importe leur nature  */
+void print_consts(struct node *tree) {
+        if (tree->left) {
+		print_consts(tree->left);
+	}
+        
+        if(strcmp(tree->token,"constante")==0){
+	        printf("Constante : ");
+                printf("%s, ", tree->left->token);
+                printf("\n");
+        }
+	if (tree->right) {
+		print_consts(tree->right);
+	}
 }
 
 int stricmp(char const *a, char const *b)
@@ -302,7 +429,11 @@ int stricmp(char const *a, char const *b)
             return d;
     }
 }
-
+/*
+        requires left, right et token valids
+        assigns left, right, token
+        ensures token est le nom du noeud, left et right ses fils gauches et droits        
+*/
 struct node* mknode(struct node *left, struct node *right, char *token) {
   struct node *newnode = (struct node*) malloc(sizeof(struct node));
   char *newstr = (char*) malloc(strlen(token)+1);
@@ -313,7 +444,44 @@ struct node* mknode(struct node *left, struct node *right, char *token) {
   return(newnode);
 }
 
+/* compte le nombre d'occurrences de valeur dans liste  */
+int nombreOccurences(list liste, char* valeur)
+        {
+        int i = 0;
 
+        /* Si la liste est vide, on renvoie 0 */
+        if(liste == NULL)
+                return 0;
+
+        /* Sinon, tant qu'il y a encore un élément ayant la val = valeur */
+        while((liste = rechercherElement(liste, valeur)) != NULL)
+        {
+                /* On incrémente */
+                liste = liste->nxt;
+                i++;
+        }
+        /* Et on retourne le nombre d'occurrences */
+        return i;
+}
+
+/*      print un avertissement lorsqu'une constante a été modifiée
+        fonction ne fonctionnant pas 
+*/
+void check_affect(){
+        int i = 0;
+        while(seen_const != NULL)
+        {
+                int nb_occ = nombreOccurences(seen_const, seen_const->val);
+                if(nb_occ > 1) {
+                        printf("ATTENTION : La constante %s a été modifiée", seen_const->val);
+                }
+                seen_const = seen_const->nxt;
+                i++;
+                printf("Valeur %s \n", seen_const->val);
+        }
+}
+
+/* fonction de debug : print un message d'erreur lors d'une erreur de syntaxe, avec un mise en forme donnant la ligne et l'objet sur lequel se comporte l'erreur */
 void yyerror(char* s) {
     fprintf(stderr, "On line %d : %s on object %s \n", countn, s, yylval.nd_obj.name); 
 }
