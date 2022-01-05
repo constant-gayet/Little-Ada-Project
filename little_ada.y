@@ -112,8 +112,8 @@ boucle_tant_que : identifiant WHILE  expression LOOP seq_instructions END_LOOP i
 boucle_pour_tout_in : expression DOUBLE_POINT expression
                     | type
                     ;
-boucle_pour_tout:FOR  identifiant IN reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP 
-                |identifiant FOR  identifiant IN  reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
+boucle_pour_tout:FOR identifiant IN boucle_pour_tout_in LOOP seq_instructions END_LOOP 
+                |identifiant ':' FOR  identifiant IN  reverse boucle_pour_tout_in LOOP seq_instructions END_LOOP identifiant ';' 
 
 reverse: REVERSE
         |%empty 
@@ -153,6 +153,7 @@ etiquette       : LEFT_QUOTE identifiant RIGHT_QUOTE seq_instructions saut
 exit: EXIT_TOKEN';'
     | EXIT_TOKEN identifiant ';'
     | EXIT_TOKEN identifiant WHEN expression ';'
+    | EXIT_TOKEN WHEN expression ';'
     ;
 
 retour_proc: RETURN ';';
@@ -199,8 +200,9 @@ specification_procedure: PROCEDURE identifiant seq_parametres ';'
 
 seq_parametres: %empty
                  | '(' parametres ')';
-parametres: parametres1 ':' mode identifiant_qualifie;
-parametres1: identifiant_virgule | identifiant_virgule ';' parametres1 ;
+parametres      :identifiant_virgule ':' mode identifiant_qualifie 
+                |identifiant_virgule ':' mode identifiant_qualifie ';' parametres
+                ;
 mode: %empty | IN | OUT | IN_OUT ;
 
 
