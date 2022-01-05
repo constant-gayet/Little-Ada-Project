@@ -25,7 +25,7 @@ int yylex();
 	} 
 
 %start file
-%token <nd_obj> DEFINE LEFT_QUOTE RIGHT_QUOTE RIGHT_ARROW DOUBLE_POINT REVERSE STRING LETTER DIGIT EXIT  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHERS  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  DEPART  END
+%token <nd_obj> DEFINE LEFT_QUOTE RIGHT_QUOTE RIGHT_ARROW DOUBLE_POINT REVERSE STRING INT BASED_INT EXP EXIT_TOKEN  GOTO  RANGE  CONSTANT  TYPE  IS_RANGE  SUBTYPE  RENAMES PROCEDURE  FUNCTION  OUT  IN_OUT  CASE  END_CASE  IS  WHEN  OTHERS  THEN  END_IF  IS_NULL  RETURN  FOR  IN  IF  ELSIF  ELSE  ID  POWER  NOT  ABS  MULTIPLY  DIVIDE  MOD  REM  ADD  SUBTRACT  EQ  NE  LE  GE  GT  LT  AND  OR  XOR  AND_THEN  OR_ELSE  LOOP  WHILE  END_LOOP  DEPART  END
 
 %type <nd_obj> file definition_fonction definition_procedure
 %%
@@ -40,38 +40,22 @@ identifiant_qualifie    : identifiant_qualifie'.'identifiant
                         | identifiant
                         ;
 
-constante   : cte_decimale
+constante   : cte_decimale {printf("conste;\n");}
             | cte_base
             | STRING
             ;
 
-cte_decimale: integer 
-            | integer '.' integer 
-            | integer exponent
-            | integer '.' integer exponent 
-integer: DIGIT
-        | integer DIGIT
-        | integer '_' integer
-exponent: 'E' integer 
-        | 'e' integer
-        | 'E' SUBTRACT integer
-        | 'e' SUBTRACT integer
-        | 'E' ADD integer
-        | 'e' ADD integer
-        ;
+cte_decimale: INT 
+            | INT '.' INT 
+            | INT '.' INT EXP 
+            | INT EXP
+            ;
 
-cte_base: integer '#' based_integer '#'
-        | integer '#' based_integer '.' based_integer '#'
-        | integer '#' based_integer '#' exponent
-        | integer '#' based_integer '.' based_integer '#' exponent
-        ;
 
-based_integer   : DIGIT    
-                | LETTER 
-                | based_integer DIGIT
-                | based_integer LETTER
-                | based_integer '_' based_integer
-                ;
+
+cte_base: BASED_INT 
+        | BASED_INT EXP
+        ;
 
 expression  :identifiant_qualifie
             |constante
@@ -163,9 +147,9 @@ distinction_cas : CASE expression IS liste_alternative END_CASE
 saut: etiquette GOTO identifiant ';'  ;    //Il faut s'assurer que l'id dans l'étiquette est le même que celui apres goto
 etiquette: LEFT_QUOTE identifiant RIGHT_QUOTE;
 
-exit: EXIT';'
-    | EXIT identifiant ';'
-    | EXIT identifiant WHEN expression ';'
+exit: EXIT_TOKEN';'
+    | EXIT_TOKEN identifiant ';'
+    | EXIT_TOKEN identifiant WHEN expression ';'
     ;
 
 retour_proc: RETURN ';';

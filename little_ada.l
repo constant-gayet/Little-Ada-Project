@@ -6,10 +6,13 @@
 %option yylineno
 
 alpha   [a-zA-Z]
-digit   [0-9]
+int     ([0-9]+(_([0-9])+)*)
+int_letter ([0-9a-fA-F]+(_([0-9a-fA-F])+)*)
+based_int     {int}[#]{int_letter}([\.]{int_letter})?[#]
+float   ^([-+]?{int}\.?{int}*)(?:[eE]([-+]?[0-9]+))?$
 delim   [ \t]
 ws      {delim}+ 
-
+eol     "\r\n"|[\n] 
 %%
 
 "--".*                                      { ; }
@@ -38,7 +41,7 @@ ws      {delim}+
 (?i:is)	                                    { strcpy(yylval.nd_obj.name,(yytext)); return IS; }
 (?i:"end case;")	                        { strcpy(yylval.nd_obj.name,(yytext)); printf("\n");return END_CASE; }
 (?i:end)	                                { strcpy(yylval.nd_obj.name,(yytext)); return END; }
-(?i:exit)	                                { strcpy(yylval.nd_obj.name,(yytext)); return EXIT; }
+(?i:exit)	                                { strcpy(yylval.nd_obj.name,(yytext)); return EXIT_TOKEN; }
 (?i:goto)	                                { strcpy(yylval.nd_obj.name,(yytext)); return GOTO; }
 (?i:range)	                                { strcpy(yylval.nd_obj.name,(yytext)); return RANGE; }
 (?i:constant)	                            { strcpy(yylval.nd_obj.name,(yytext)); return CONSTANT; }
@@ -70,12 +73,13 @@ ws      {delim}+
 (?i:xor)	                                { strcpy(yylval.nd_obj.name,(yytext)); return XOR; }
 (?i:"and then")	                            { strcpy(yylval.nd_obj.name,(yytext)); return AND_THEN; }
 (?i:"or else")	                            { strcpy(yylval.nd_obj.name,(yytext)); return OR_ELSE; }
-[0-9]                                       { strcpy(yylval.nd_obj.name,(yytext)); return DIGIT; }
-[a-f]                                       { strcpy(yylval.nd_obj.name,(yytext)); return LETTER; }
+[eE][+-]?{int}                              { strcpy(yylval.nd_obj.name,(yytext)); return EXP; }
+{based_int}                                 { strcpy(yylval.nd_obj.name,(yytext)); return BASED_INT; }
+{int}                                       { strcpy(yylval.nd_obj.name,(yytext)); printf("int : %s\n",yytext);return INT; }
 ["].*["]                                    { strcpy(yylval.nd_obj.name,(yytext)); return STRING; }
 [a-zA-Z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*        { strcpy(yylval.nd_obj.name,(yytext)); printf("ID is %s \n", yylval.nd_obj.name); return ID; }
 {ws}                                        { ; }
-"\r\n"|[\n]                                 { countn++; }
+{eol}                                       { countn++; }
 .	                                        { return *yytext; }
 %%
 
